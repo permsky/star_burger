@@ -1,7 +1,7 @@
-import json
-
 from django.http import JsonResponse
 from django.templatetags.static import static
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 
 from .models import (
@@ -63,19 +63,19 @@ def product_list_api(request):
     })
 
 
+@api_view(['POST'])
 def register_order(request):
-    if request.method == 'POST':
-        serialized_order = json.loads(request.body.decode())
-        order = Order.objects.create(
-            customer_firstname=serialized_order['firstname'],
-            customer_lastname=serialized_order['lastname'],
-            address=serialized_order['address'],
-            phonenumber=serialized_order['phonenumber'],
+    serialized_order = request.data
+    order = Order.objects.create(
+        customer_firstname=serialized_order['firstname'],
+        customer_lastname=serialized_order['lastname'],
+        address=serialized_order['address'],
+        phonenumber=serialized_order['phonenumber'],
+    )
+    for order_item in serialized_order['products']:
+        OrderItem.objects.create(
+            item=Product.objects.get(id=order_item['product']),
+            order=order,
+            quantity=order_item['quantity']
         )
-        for order_item in serialized_order['products']:
-            OrderItem.objects.create(
-                item=Product.objects.get(id=order_item['product']),
-                order=order,
-                quantity=order_item['quantity']
-            )
-    return JsonResponse(serialized_order)
+    return Response(serialized_order)

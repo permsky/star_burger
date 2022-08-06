@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -66,13 +67,19 @@ def product_list_api(request):
 @api_view(['POST'])
 def register_order(request):
     serialized_order = request.data
+    products = serialized_order.get('products', list())
+    if not isinstance(products, list) or products == list():
+        content = {
+            'error': 'products key not presented or not a list'
+        }
+        return Response(content, status=status.HTTP_400_BAD_REQUEST)
     order = Order.objects.create(
         customer_firstname=serialized_order['firstname'],
         customer_lastname=serialized_order['lastname'],
         address=serialized_order['address'],
         phonenumber=serialized_order['phonenumber'],
     )
-    for order_item in serialized_order['products']:
+    for order_item in products:
         OrderItem.objects.create(
             item=Product.objects.get(id=order_item['product']),
             order=order,

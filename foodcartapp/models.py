@@ -125,8 +125,8 @@ class RestaurantMenuItem(models.Model):
 
 
 class Order(models.Model):
-    customer_firstname = models.CharField('имя клиента', max_length=255)
-    customer_lastname = models.CharField('фамилия клиента', max_length=255)
+    firstname = models.CharField('имя клиента', max_length=255)
+    lastname = models.CharField('фамилия клиента', max_length=255)
     phonenumber =  PhoneNumberField(
         region='RU',
         verbose_name='номер телефона клиента',
@@ -147,7 +147,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    item = models.ForeignKey(
+    product = models.ForeignKey(
         Product,
         verbose_name='товар',
         related_name='in_order',
@@ -168,4 +168,4 @@ class OrderItem(models.Model):
         verbose_name_plural = 'товары в заказе'
 
     def __str__(self):
-        return f'{self.item.name}'
+        return f'{self.product.name}: {self.quantity}'

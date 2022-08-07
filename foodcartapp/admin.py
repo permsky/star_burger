@@ -120,8 +120,8 @@ class OrderAdmin(admin.ModelAdmin):
         'address',
     ]
     list_display = [
-        'customer_firstname',
-        'customer_lastname',
+        'firstname',
+        'lastname',
         'phonenumber',
         'address',
     ]

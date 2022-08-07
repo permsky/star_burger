@@ -1,3 +1,4 @@
+import phonenumbers
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework import status
@@ -67,11 +68,50 @@ def product_list_api(request):
 @api_view(['POST'])
 def register_order(request):
     serialized_order = request.data
+    content = dict()
+    fields = list()
     products = serialized_order.get('products', list())
     if not isinstance(products, list) or products == list():
         content = {
-            'error': 'products key not presented or not a list'
+            'error': 'The key \'products\' not presented or not a list'
         }
+    firstname = serialized_order.get('firstname', '')
+    if not isinstance(firstname, str) or firstname == '':
+        fields.append('firstname')
+        content = {
+            'error': f'{", ".join(fields)} not presented or not a str'
+        }
+    lastname = serialized_order.get('lastname', '')
+    if not isinstance(lastname, str) or lastname == '':
+        fields.append('lastname')
+        content = {
+            'error': f'{", ".join(fields)} not presented or not a str'
+        }
+    address = serialized_order.get('address', '')
+    if not isinstance(address, str) or address == '':
+        fields.append('address')
+        content = {
+            'error': f'{", ".join(fields)} not presented or not a str'
+        }
+    phonenumber = serialized_order.get('phonenumber', '')
+    if not isinstance(phonenumber, str) or phonenumber == '':
+        fields.append('phonenumber')
+        content = {
+            'error': f'{", ".join(fields)} not presented or not a str'
+        }
+    else:
+        try:
+            phonenumber = phonenumbers.parse(phonenumber, 'RU')
+            if not phonenumbers.is_valid_number(phonenumber):
+                content = {'error': 'phonenumber is not valid'}
+        except phonenumbers.NumberParseException as exc:
+            content = {'error': exc._msg}
+    try:
+        for order_item in products:
+            Product.objects.get(id=order_item['product'])
+    except Product.DoesNotExist as exc:
+        content = {'error': str(exc)}
+    if content:
         return Response(content, status=status.HTTP_400_BAD_REQUEST)
     order = Order.objects.create(
         customer_firstname=serialized_order['firstname'],
@@ -85,4 +125,5 @@ def register_order(request):
             order=order,
             quantity=order_item['quantity']
         )
+
     return Response(serialized_order)

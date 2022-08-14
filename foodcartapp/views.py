@@ -75,11 +75,13 @@ class OrderItemSerializer(ModelSerializer):
 class OrderSerializer(ModelSerializer):
     products = ListField(
         child=OrderItemSerializer(),
-        allow_empty=False
+        allow_empty=False,
+        write_only=True
     )
     class Meta:
         model = Order
         fields = [
+            'id',  
             'firstname',
             'lastname',
             'address',
@@ -103,5 +105,7 @@ def register_order(request):
     products_fields = serializer.validated_data['products']
     products = [OrderItem(order=order, **fields) for fields in products_fields]
     OrderItem.objects.bulk_create(products)
+
+    serializer = OrderSerializer(order)
 
     return Response(serializer.data)

@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Count, F, Sum
+from django.db.models import F, Sum
 from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -131,7 +131,7 @@ class OrderQuerySet(models.QuerySet):
             OrderItem.objects
             .values('order')
             .order_by('order')
-            .annotate(item_cost=Sum(F('quantity') * F('product__price')))
+            .annotate(item_cost=Sum(F('cost')))
         )
         orders = list()
         for item in items:
@@ -180,6 +180,13 @@ class OrderItem(models.Model):
         verbose_name='заказ',
         related_name='order_items',
         on_delete=models.CASCADE,
+    )
+    cost = models.DecimalField(
+        'стоимость',
+        max_digits=8,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        default=0,
     )
 
     class Meta:

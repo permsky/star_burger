@@ -150,6 +150,10 @@ class Order(models.Model):
         ('3', 'В доставке'),
         ('4', 'Выполнен'),
     ]
+    PAYMENT_METHODS = [
+        ('1', 'Электронно'),
+        ('2', 'Наличностью'),
+    ]
     firstname = models.CharField('имя клиента', max_length=255)
     lastname = models.CharField('фамилия клиента', max_length=255)
     phonenumber =  PhoneNumberField(
@@ -186,6 +190,13 @@ class Order(models.Model):
         null=True,
         blank=True,
         db_index=True,
+    )
+    payment_method = models.CharField(
+        'способ оплаты',
+        max_length=2,
+        db_index=True,
+        choices=PAYMENT_METHODS,
+        default='1',
     )
     objects = OrderQuerySet.as_manager()
 

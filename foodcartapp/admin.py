@@ -131,6 +131,7 @@ class OrderAdmin(admin.ModelAdmin):
         'created_at',
         'called_at',
         'delivered_at',
+        'payment_method',
     ]
     inlines = [
         OrderItemInline

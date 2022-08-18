@@ -128,3 +128,10 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [
         OrderItemInline
     ]
+
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for instance in instances:
+            instance.cost = instance.quantity * instance.product.price
+            instance.save()
+        formset.save()

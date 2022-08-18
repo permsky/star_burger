@@ -168,6 +168,7 @@ class Order(models.Model):
         choices=STATUSES,
         default='1',
     )
+    comment = models.TextField('комментарий', blank=True)
     objects = OrderQuerySet.as_manager()
 
     class Meta:

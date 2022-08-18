@@ -88,6 +88,7 @@ DATABASES = {
         default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
     )
 }
+DATABASES['default']['ATOMIC_REQUESTS'] = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {

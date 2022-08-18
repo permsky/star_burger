@@ -1,7 +1,8 @@
 from django.contrib import admin
-from django.shortcuts import reverse
+from django.shortcuts import reverse, redirect
 from django.templatetags.static import static
 from django.utils.html import format_html
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .models import Order
 from .models import OrderItem
@@ -9,6 +10,7 @@ from .models import Product
 from .models import ProductCategory
 from .models import Restaurant
 from .models import RestaurantMenuItem
+from star_burger.settings import ALLOWED_HOSTS
 
 
 class RestaurantMenuItemInline(admin.TabularInline):
@@ -135,3 +137,14 @@ class OrderAdmin(admin.ModelAdmin):
             instance.cost = instance.quantity * instance.product.price
             instance.save()
         formset.save()
+    
+    def response_post_save_change(self, request, obj):
+        response = super().response_post_save_change(request, obj)
+        is_valid_url = url_has_allowed_host_and_scheme(
+                url=request.GET['next'],
+                allowed_hosts=ALLOWED_HOSTS
+            )
+        if 'next' in request.GET and is_valid_url:
+            return redirect(reverse('restaurateur:view_orders'))
+        else:
+            return response

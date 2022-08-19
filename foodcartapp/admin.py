@@ -127,6 +127,7 @@ class OrderAdmin(admin.ModelAdmin):
         'phonenumber',
         'address',
         'status',
+        'restaurant',
         'comment',
         'created_at',
         'called_at',
@@ -145,9 +146,12 @@ class OrderAdmin(admin.ModelAdmin):
         formset.save()
     
     def response_post_save_change(self, request, obj):
+        if request.POST['status'] == '1' and request.POST['restaurant']:
+            obj.status = '2'
+            obj.save()
         response = super().response_post_save_change(request, obj)
         is_valid_url = url_has_allowed_host_and_scheme(
-                url=request.GET['next'],
+                url=request.GET.get('next'),
                 allowed_hosts=ALLOWED_HOSTS
             )
         if 'next' in request.GET and is_valid_url:

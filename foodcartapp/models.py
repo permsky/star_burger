@@ -1,8 +1,14 @@
+from operator import itemgetter
+
 from django.db import models
 from django.db.models import F, Sum
 from django.core.validators import MinValueValidator
 from django.utils import timezone
+from geopy import distance
 from phonenumber_field.modelfields import PhoneNumberField
+
+from .utils import fetch_coordinates
+from star_burger.settings import YANDEX_GEO_API_KEY
 
 
 class Restaurant(models.Model):
@@ -131,15 +137,49 @@ class OrderQuerySet(models.QuerySet):
         items = (
             OrderItem.objects
             .values('order')
-            .order_by('order')
+            .order_by('order__status')
             .annotate(item_cost=Sum(F('cost')))
         )
+        api_key = YANDEX_GEO_API_KEY
         orders = list()
         for item in items:
             for order in self:
                 if order.id == item['order']:
                     order.cost = item['item_cost']
                     orders.append(order)
+        for order in orders:
+            products_in_restaurants = list()
+            for order_item in order.order_items.all():
+                restaurants = list()
+                for menu_item in order_item.product.menu_items.all():
+                    restaurants.append(menu_item.restaurant)
+                products_in_restaurants.append({
+                    'product': order_item.product,
+                    'restaurants': restaurants
+                })
+            restaurant_groups = [set(product['restaurants']) \
+                for product in products_in_restaurants]
+            order.restaurants = (
+                restaurant_groups[0]
+                .intersection(*restaurant_groups[1:])
+            )
+            distances = list()
+            client_coordinates = fetch_coordinates(api_key, order.address)
+            if client_coordinates:
+                for restaurant in order.restaurants:
+                    distance_between_restaurant_and_client = (
+                        distance.distance(
+                            client_coordinates,
+                            fetch_coordinates(api_key, restaurant.address)
+                        ).km
+                    )
+                    distances.append([
+                        restaurant,
+                        round(distance_between_restaurant_and_client, 3)
+                    ])
+                order.distances = sorted(distances, key=itemgetter(1))
+            else:
+                order.distances = None
         return orders
 
 
@@ -172,6 +212,14 @@ class Order(models.Model):
         db_index=True,
         choices=STATUSES,
         default='1',
+    )
+    restaurant = models.ForeignKey(
+        Restaurant,
+        verbose_name='ресторан выполнения заказа',
+        related_name='orders',
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
     )
     comment = models.TextField('комментарий', blank=True)
     created_at = models.DateTimeField(

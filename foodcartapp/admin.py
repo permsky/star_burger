@@ -10,6 +10,7 @@ from .models import Product
 from .models import ProductCategory
 from .models import Restaurant
 from .models import RestaurantMenuItem
+from places.models import Place
 from star_burger.settings import ALLOWED_HOSTS
 
 
@@ -158,3 +159,8 @@ class OrderAdmin(admin.ModelAdmin):
             return redirect(reverse('restaurateur:view_orders'))
         else:
             return response
+
+
+@admin.register(Place)
+class PlaceAdmin(admin.ModelAdmin):
+    pass

@@ -9,7 +9,8 @@ from geopy import distance
 from loguru import logger
 from phonenumber_field.modelfields import PhoneNumberField
 
-from .utils import fetch_coordinates
+from places.models import Place
+from places.utils import fetch_coordinates
 from star_burger.settings import YANDEX_GEO_API_KEY
 
 
@@ -160,8 +161,28 @@ class OrderQuerySet(models.QuerySet):
             )
             distances = list()
             api_key = YANDEX_GEO_API_KEY
+            order_address = order.address
+            client_place, is_created = Place.objects.get_or_create(
+                address=order_address,
+                defaults = {
+                    'lattitude': None,
+                    'longitude': None
+                }
+            )
             try:
-                client_coordinates = fetch_coordinates(api_key, order.address)
+                if not is_created:
+                    client_coordinates = (
+                        client_place.lattitude,
+                        client_place.longitude
+                    )
+                else:
+                    client_coordinates = fetch_coordinates(
+                        api_key,
+                        order_address
+                    )
+                    client_place.lattitude = client_coordinates[0]
+                    client_place.longitude = client_coordinates[1]
+                    client_place.save()
             except requests.exceptions.HTTPError:
                 logger.exception("Ошибка HTTP запроса:")
                 client_coordinates = None
@@ -170,11 +191,28 @@ class OrderQuerySet(models.QuerySet):
                 client_coordinates = None
             if client_coordinates:
                 for restaurant in order.restaurants:
+                    restaurant_address = restaurant.address
+                    place, is_created = Place.objects.get_or_create(
+                        address=restaurant_address,
+                        defaults = {
+                            'lattitude': None,
+                            'longitude': None
+                        }
+                    )
                     try:
-                        restaurant_coordinates = fetch_coordinates(
-                            api_key,
-                            restaurant.address
-                        )
+                        if not is_created:
+                            restaurant_coordinates = (
+                                place.lattitude,
+                                place.longitude
+                            )
+                        else:
+                            restaurant_coordinates = fetch_coordinates(
+                                api_key,
+                                restaurant_address
+                            )
+                            place.lattitude = restaurant_coordinates[0]
+                            place.longitude = restaurant_coordinates[1]
+                            place.save()
                     except requests.exceptions.HTTPError:
                         logger.exception("Ошибка HTTP запроса:")
                         order.distances = None

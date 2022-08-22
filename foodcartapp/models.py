@@ -1,10 +1,12 @@
 from operator import itemgetter
 
+import requests
 from django.db import models
-from django.db.models import F, Sum
+from django.db.models import Prefetch
 from django.core.validators import MinValueValidator
 from django.utils import timezone
 from geopy import distance
+from loguru import logger
 from phonenumber_field.modelfields import PhoneNumberField
 
 from .utils import fetch_coordinates
@@ -133,20 +135,13 @@ class RestaurantMenuItem(models.Model):
 
 
 class OrderQuerySet(models.QuerySet):
-    def evaluate_cost(self):
-        items = (
-            OrderItem.objects
-            .values('order')
-            .order_by('order__status')
-            .annotate(item_cost=Sum(F('cost')))
+    def evaluate_distances(self):
+        orders = self.prefetch_related(
+            Prefetch(
+                'order_items',
+                queryset=OrderItem.objects.select_related('product')
+            )
         )
-        api_key = YANDEX_GEO_API_KEY
-        orders = list()
-        for item in items:
-            for order in self:
-                if order.id == item['order']:
-                    order.cost = item['item_cost']
-                    orders.append(order)
         for order in orders:
             products_in_restaurants = list()
             for order_item in order.order_items.all():
@@ -164,13 +159,34 @@ class OrderQuerySet(models.QuerySet):
                 .intersection(*restaurant_groups[1:])
             )
             distances = list()
-            client_coordinates = fetch_coordinates(api_key, order.address)
+            api_key = YANDEX_GEO_API_KEY
+            try:
+                client_coordinates = fetch_coordinates(api_key, order.address)
+            except requests.exceptions.HTTPError:
+                logger.exception("Ошибка HTTP запроса:")
+                client_coordinates = None
+            except Exception:
+                logger.exception("Непредвиденная ошибка:")
+                client_coordinates = None
             if client_coordinates:
                 for restaurant in order.restaurants:
+                    try:
+                        restaurant_coordinates = fetch_coordinates(
+                            api_key,
+                            restaurant.address
+                        )
+                    except requests.exceptions.HTTPError:
+                        logger.exception("Ошибка HTTP запроса:")
+                        order.distances = None
+                        break
+                    except Exception:
+                        logger.exception("Непредвиденная ошибка:")
+                        order.distances = None
+                        break
                     distance_between_restaurant_and_client = (
                         distance.distance(
                             client_coordinates,
-                            fetch_coordinates(api_key, restaurant.address)
+                            restaurant_coordinates
                         ).km
                     )
                     distances.append([

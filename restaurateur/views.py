@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Sum
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
@@ -98,5 +99,10 @@ def view_restaurants(request):
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     return render(request, template_name='order_items.html', context={
-        'order_items': Order.objects.exclude(status='4').evaluate_cost(),
+        'order_items': (
+            Order.objects
+            .exclude(status='4')
+            .annotate(cost=Sum('order_items__cost'))
+            .evaluate_distances()
+        ),
     })

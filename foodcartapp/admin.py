@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from django.shortcuts import reverse, redirect
 from django.templatetags.static import static
@@ -11,7 +12,6 @@ from .models import ProductCategory
 from .models import Restaurant
 from .models import RestaurantMenuItem
 from places.models import Place
-from star_burger.settings import ALLOWED_HOSTS
 
 
 class RestaurantMenuItemInline(admin.TabularInline):
@@ -153,7 +153,7 @@ class OrderAdmin(admin.ModelAdmin):
         response = super().response_post_save_change(request, obj)
         is_valid_url = url_has_allowed_host_and_scheme(
                 url=request.GET.get('next'),
-                allowed_hosts=ALLOWED_HOSTS
+                allowed_hosts=settings.ALLOWED_HOSTS
             )
         if 'next' in request.GET and is_valid_url:
             return redirect(reverse('restaurateur:view_orders'))

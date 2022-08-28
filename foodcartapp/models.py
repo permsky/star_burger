@@ -3,6 +3,7 @@ from operator import itemgetter
 import requests
 from django.db import models
 from django.db.models import Prefetch
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.utils import timezone
 from geopy import distance
@@ -11,7 +12,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 from places.models import Place
 from places.utils import fetch_coordinates
-from star_burger.settings import YANDEX_GEO_API_KEY
 
 
 class Restaurant(models.Model):
@@ -160,7 +160,7 @@ class OrderQuerySet(models.QuerySet):
                 .intersection(*restaurant_groups[1:])
             )
             distances = list()
-            api_key = YANDEX_GEO_API_KEY
+            api_key = settings.YANDEX_GEO_API_KEY
             order_address = order.address
             client_place, is_created = Place.objects.get_or_create(
                 address=order_address,

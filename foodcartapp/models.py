@@ -146,9 +146,8 @@ class OrderQuerySet(models.QuerySet):
         for order in orders:
             products_in_restaurants = list()
             for order_item in order.items.all():
-                restaurants = list()
-                for menu_item in order_item.product.menu_items.all():
-                    restaurants.append(menu_item.restaurant)
+                restaurants = [menu_item.restaurant for menu_item \
+                    in order_item.product.menu_items.all()]
                 products_in_restaurants.append({
                     'product': order_item.product,
                     'restaurants': restaurants

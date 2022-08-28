@@ -270,7 +270,7 @@ class Order(models.Model):
     )
     restaurant = models.ForeignKey(
         Restaurant,
-        verbose_name='ресторан выполнения заказа',
+        verbose_name='ресторан',
         related_name='orders',
         blank=True,
         null=True,

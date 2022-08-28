@@ -188,51 +188,51 @@ class OrderQuerySet(models.QuerySet):
             except Exception:
                 logger.exception("Непредвиденная ошибка:")
                 client_coordinates = None
-            if client_coordinates:
-                for restaurant in order.restaurants:
-                    restaurant_address = restaurant.address
-                    place, is_created = Place.objects.get_or_create(
-                        address=restaurant_address,
-                        defaults = {
-                            'lattitude': None,
-                            'longitude': None
-                        }
-                    )
-                    try:
-                        if not is_created:
-                            restaurant_coordinates = (
-                                place.lattitude,
-                                place.longitude
-                            )
-                        else:
-                            restaurant_coordinates = fetch_coordinates(
-                                api_key,
-                                restaurant_address
-                            )
-                            place.lattitude, place.longitude \
-                                = restaurant_coordinates
-                            place.save()
-                    except requests.exceptions.HTTPError:
-                        logger.exception("Ошибка HTTP запроса:")
-                        order.distances = None
-                        break
-                    except Exception:
-                        logger.exception("Непредвиденная ошибка:")
-                        order.distances = None
-                        break
-                    distance_between_restaurant_and_client = (
-                        distance.distance(
-                            client_coordinates,
-                            restaurant_coordinates
-                        ).km
-                    )
-                    distances.append([
-                        restaurant,
-                        round(distance_between_restaurant_and_client, 3)
-                    ])
-                order.distances = sorted(distances, key=itemgetter(1))
-            else:
+            if not client_coordinates:
                 order.distances = None
+                continue
+            for restaurant in order.restaurants:
+                restaurant_address = restaurant.address
+                place, is_created = Place.objects.get_or_create(
+                    address=restaurant_address,
+                    defaults = {
+                        'lattitude': None,
+                        'longitude': None
+                    }
+                )
+                try:
+                    if not is_created:
+                        restaurant_coordinates = (
+                            place.lattitude,
+                            place.longitude
+                        )
+                    else:
+                        restaurant_coordinates = fetch_coordinates(
+                            api_key,
+                            restaurant_address
+                        )
+                        place.lattitude, place.longitude \
+                            = restaurant_coordinates
+                        place.save()
+                except requests.exceptions.HTTPError:
+                    logger.exception("Ошибка HTTP запроса:")
+                    order.distances = None
+                    break
+                except Exception:
+                    logger.exception("Непредвиденная ошибка:")
+                    order.distances = None
+                    break
+                distance_between_restaurant_and_client = (
+                    distance.distance(
+                        client_coordinates,
+                        restaurant_coordinates
+                    ).km
+                )
+                distances.append([
+                    restaurant,
+                    round(distance_between_restaurant_and_client, 3)
+                ])
+            order.distances = sorted(distances, key=itemgetter(1))
         return orders
 
 

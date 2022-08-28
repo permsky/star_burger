@@ -139,13 +139,13 @@ class OrderQuerySet(models.QuerySet):
     def evaluate_distances(self):
         orders = self.prefetch_related(
             Prefetch(
-                'order_items',
+                'items',
                 queryset=OrderItem.objects.select_related('product')
             )
         )
         for order in orders:
             products_in_restaurants = list()
-            for order_item in order.order_items.all():
+            for order_item in order.items.all():
                 restaurants = list()
                 for menu_item in order_item.product.menu_items.all():
                     restaurants.append(menu_item.restaurant)
@@ -324,7 +324,7 @@ class OrderItem(models.Model):
     order = models.ForeignKey(
         Order,
         verbose_name='заказ',
-        related_name='order_items',
+        related_name='items',
         on_delete=models.CASCADE,
     )
     cost = models.DecimalField(

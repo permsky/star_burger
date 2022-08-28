@@ -102,7 +102,7 @@ def view_orders(request):
         'order_items': (
             Order.objects
             .exclude(status='4')
-            .annotate(cost=Sum('order_items__cost'))
+            .annotate(cost=Sum('items__cost'))
             .evaluate_distances()
         ),
     })

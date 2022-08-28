@@ -179,8 +179,8 @@ class OrderQuerySet(models.QuerySet):
                         api_key,
                         order_address
                     )
-                    client_place.lattitude = client_coordinates[0]
-                    client_place.longitude = client_coordinates[1]
+                    client_place.lattitude, client_place.longitude \
+                        = client_coordinates
                     client_place.save()
             except requests.exceptions.HTTPError:
                 logger.exception("Ошибка HTTP запроса:")
@@ -209,8 +209,8 @@ class OrderQuerySet(models.QuerySet):
                                 api_key,
                                 restaurant_address
                             )
-                            place.lattitude = restaurant_coordinates[0]
-                            place.longitude = restaurant_coordinates[1]
+                            place.lattitude, place.longitude \
+                                = restaurant_coordinates
                             place.save()
                     except requests.exceptions.HTTPError:
                         logger.exception("Ошибка HTTP запроса:")

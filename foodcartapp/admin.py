@@ -144,7 +144,12 @@ class OrderAdmin(admin.ModelAdmin):
         for instance in instances:
             instance.cost = instance.quantity * instance.product.price
             instance.save()
-        formset.save()
+        return super().save_formset(
+            request,
+            form,
+            formset,
+            change
+        )
     
     def response_post_save_change(self, request, obj):
         if request.POST['status'] == '1' and request.POST['restaurant']:

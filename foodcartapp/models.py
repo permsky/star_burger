@@ -247,6 +247,7 @@ class Order(models.Model):
     PAYMENT_METHODS = [
         ('1', 'Электронно'),
         ('2', 'Наличностью'),
+        ('3', 'Не выбран'),
     ]
     firstname = models.CharField('имя клиента', max_length=255)
     lastname = models.CharField('фамилия клиента', max_length=255)
@@ -298,7 +299,7 @@ class Order(models.Model):
         max_length=2,
         db_index=True,
         choices=PAYMENT_METHODS,
-        default='1',
+        default='3',
     )
     objects = OrderQuerySet.as_manager()
 

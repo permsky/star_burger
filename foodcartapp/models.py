@@ -315,7 +315,7 @@ class OrderItem(models.Model):
     product = models.ForeignKey(
         Product,
         verbose_name='товар',
-        related_name='in_order',
+        related_name='in_orders',
         on_delete=models.CASCADE,
     )
     quantity = models.PositiveSmallIntegerField(

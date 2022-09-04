@@ -36,8 +36,8 @@
         <td>{{ item.address }}</td>
         <td>{{ item.comment }}</td>
         <td>
-          {% if item.restaurant %}
-            Готовит {{ item.restaurant.name }}
+          {% if item.cooking_restaurant %}
+            Готовит {{ item.cooking_restaurant.name }}
           {% else %}
             {% if item.distances %}
               <details>

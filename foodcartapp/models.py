@@ -184,7 +184,7 @@ class Order(models.Model):
         choices=STATUSES,
         default='1',
     )
-    restaurant = models.ForeignKey(
+    cooking_restaurant = models.ForeignKey(
         Restaurant,
         verbose_name='ресторан',
         related_name='orders',

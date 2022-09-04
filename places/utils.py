@@ -37,15 +37,18 @@ def evaluate_distances_to_restaurants(order, api_key):
     )
     try:
         if not is_created:
+            if not client_place.lattitude and not client_place.longitude:
+                order.distances = None
+                return order
             client_coordinates = (
                 client_place.lattitude,
                 client_place.longitude
             )
         else:
-            client_coordinates = fetch_coordinates(
-                api_key,
-                order_address
-            )
+            client_coordinates = fetch_coordinates(api_key, order_address)
+            if not client_coordinates:
+                order.distances = None
+                return order
             client_place.lattitude, client_place.longitude \
                 = client_coordinates
             client_place.save()

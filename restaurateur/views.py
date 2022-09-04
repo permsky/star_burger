@@ -9,6 +9,7 @@ from django.views import View
 from django.urls import reverse_lazy
 
 from foodcartapp.models import Product, Restaurant, Order
+from places.models import Place
 from places.utils import evaluate_distances_to_restaurants
 
 
@@ -104,11 +105,22 @@ def view_orders(request):
         .annotate(cost=Sum('items__cost'))
         .find_available_restaurants()
     )
+    places = list(Place.objects.all())
+    place_addresses = [place.address for place in places]
     for order in orders:
-        order = evaluate_distances_to_restaurants(
-            order=order,
-            api_key=settings.YANDEX_GEO_API_KEY
-        )
+        if order.address in place_addresses:
+            for place in places:
+                if order.address == place.address:
+                    order = evaluate_distances_to_restaurants(
+                        order=order,
+                        api_key=settings.YANDEX_GEO_API_KEY,
+                        place=place
+                    )
+        else:
+            order = evaluate_distances_to_restaurants(
+                order=order,
+                api_key=settings.YANDEX_GEO_API_KEY
+            )
 
     return render(request, template_name='order_items.html', context={
         'order_items': orders,

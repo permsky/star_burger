@@ -25,18 +25,19 @@ def fetch_coordinates(apikey, address):
     return lat, lon
 
 
-def evaluate_distances_to_restaurants(order, api_key):
+def evaluate_distances_to_restaurants(order, api_key, place=None):
     distances = list()
     order_address = order.address
-    client_place, is_created = Place.objects.get_or_create(
-        address=order_address,
-        defaults = {
-            'lattitude': None,
-            'longitude': None
-        }
-    )
+    if place:
+        client_place = place
+    else:
+        client_place = Place.objects.create(
+            address=order_address,
+            lattitude=None,
+            longitude=None
+        )
     try:
-        if not is_created:
+        if place:
             if not client_place.lattitude and not client_place.longitude:
                 order.distances = None
                 return order
@@ -65,7 +66,7 @@ def evaluate_distances_to_restaurants(order, api_key):
         restaurant_address = restaurant.address
         place, is_created = Place.objects.get_or_create(
             address=restaurant_address,
-            defaults = {
+            defaults={
                 'lattitude': None,
                 'longitude': None
             }

@@ -28,16 +28,9 @@ def fetch_coordinates(apikey, address):
 def evaluate_distances_to_restaurants(order, api_key, place=None):
     distances = list()
     order_address = order.address
-    if place:
-        client_place = place
-    else:
-        client_place = Place.objects.create(
-            address=order_address,
-            lattitude=None,
-            longitude=None
-        )
     try:
         if place:
+            client_place = place
             if not client_place.lattitude and not client_place.longitude:
                 order.distances = None
                 return order
@@ -46,6 +39,11 @@ def evaluate_distances_to_restaurants(order, api_key, place=None):
                 client_place.longitude
             )
         else:
+            client_place = Place.objects.create(
+                address=order_address,
+                lattitude=None,
+                longitude=None
+            )
             client_coordinates = fetch_coordinates(api_key, order_address)
             if not client_coordinates:
                 order.distances = None

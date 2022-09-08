@@ -108,6 +108,9 @@ def view_orders(request):
     order_addresses = [order.address for order in orders]
     places = Place.objects.filter(address__in=order_addresses)
     place_addresses = [place.address for place in places]
+    restaurants = Restaurant.objects.all()
+    restaurant_addresses = [restaurant.address for restaurant in restaurants]
+    restaurant_places = Place.objects.filter(address__in=restaurant_addresses)
     for order in orders:
         if order.address in place_addresses:
             for place in places:
@@ -115,12 +118,14 @@ def view_orders(request):
                     order = evaluate_distances_to_restaurants(
                         order=order,
                         api_key=settings.YANDEX_GEO_API_KEY,
+                        restaurant_places=restaurant_places,
                         place=place
                     )
         else:
             order = evaluate_distances_to_restaurants(
                 order=order,
-                api_key=settings.YANDEX_GEO_API_KEY
+                api_key=settings.YANDEX_GEO_API_KEY,
+                restaurant_places=restaurant_places
             )
 
     return render(request, template_name='order_items.html', context={

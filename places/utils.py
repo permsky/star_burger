@@ -25,7 +25,12 @@ def fetch_coordinates(apikey, address):
     return lat, lon
 
 
-def evaluate_distances_to_restaurants(order, api_key, place=None):
+def evaluate_distances_to_restaurants(
+    order,
+    api_key,
+    restaurant_places,
+    place=None
+):
     distances = list()
     order_address = order.address
     try:
@@ -58,14 +63,12 @@ def evaluate_distances_to_restaurants(order, api_key, place=None):
         order.distances = None
         return order
     restaurants = order.restaurants
-    restaurant_addresses = [restaurant.address for restaurant in restaurants]
-    places = Place.objects.filter(address__in=restaurant_addresses)
-    place_addresses = [place.address for place in places]
+    place_addresses = [place.address for place in restaurant_places]
     for restaurant in restaurants:
         restaurant_address = restaurant.address
         try:
             if restaurant_address in place_addresses:
-                for place in places:
+                for place in restaurant_places:
                     if restaurant_address == place.address:
                         restaurant_coordinates = (
                             place.lattitude,

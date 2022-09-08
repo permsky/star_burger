@@ -57,28 +57,30 @@ def evaluate_distances_to_restaurants(order, api_key, place=None):
     if not client_coordinates:
         order.distances = None
         return order
-    for restaurant in order.restaurants:
+    restaurants = order.restaurants
+    restaurant_addresses = [restaurant.address for restaurant in restaurants]
+    places = Place.objects.filter(address__in=restaurant_addresses)
+    place_addresses = [place.address for place in places]
+    for restaurant in restaurants:
         restaurant_address = restaurant.address
-        place, is_created = Place.objects.get_or_create(
-            address=restaurant_address,
-            defaults={
-                'lattitude': None,
-                'longitude': None
-            }
-        )
         try:
-            if not is_created:
-                restaurant_coordinates = (
-                    place.lattitude,
-                    place.longitude
-                )
+            if restaurant_address in place_addresses:
+                for place in places:
+                    if restaurant_address == place.address:
+                        restaurant_coordinates = (
+                            place.lattitude,
+                            place.longitude
+                        )
             else:
                 restaurant_coordinates = fetch_coordinates(
                     api_key,
                     restaurant_address
                 )
-                place.lattitude, place.longitude = restaurant_coordinates
-                place.save()
+                Place.objects.create(
+                    address=restaurant_address,
+                    lattitude=restaurant_coordinates[0],
+                    longitude=restaurant_coordinates[1]
+                )
         except requests.exceptions.HTTPError:
             logger.exception("Ошибка HTTP запроса:")
             order.distances = None

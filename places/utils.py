@@ -83,11 +83,11 @@ def evaluate_distances_to_restaurants(order, api_key, place=None):
                 )
         except requests.exceptions.HTTPError:
             logger.exception("Ошибка HTTP запроса:")
-            order.distances = None
+            distances = list()
             break
         except Exception:
             logger.exception("Непредвиденная ошибка:")
-            order.distances = None
+            distances = list()
             break
         distance_between_restaurant_and_client = (
             distance.distance(

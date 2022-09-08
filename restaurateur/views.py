@@ -105,7 +105,8 @@ def view_orders(request):
         .annotate(cost=Sum('items__cost'))
         .find_available_restaurants()
     )
-    places = list(Place.objects.all())
+    order_addresses = [order.address for order in orders]
+    places = Place.objects.filter(address__in=order_addresses)
     place_addresses = [place.address for place in places]
     for order in orders:
         if order.address in place_addresses:

@@ -57,6 +57,8 @@ pip install -r requirements.txt
 Создайте файл `.env` в каталоге `star_burger/` со следующими настройками:
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `YANDEX_GEO_API_KEY` — API ключ, нужно получить в [кабинете разработчика](https://developer.tech.yandex.ru/services/)
+- `ROLLBAR_TOKEN` - значение токена post_server_item, который можно найти в [настройках проекта](https://rollbar.com/)
+- `ENVIRONMENT_NAME` - имя вашего development окружения
 
 Создайте файл базы данных SQLite и отмигрируйте её следующей командой:
 
@@ -147,6 +149,8 @@ Parcel будет следить за файлами в каталоге `bundle
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
 - `YANDEX_GEO_API_KEY` — API ключ, нужно получить в [кабинете разработчика](https://developer.tech.yandex.ru/services/)
+- `ROLLBAR_TOKEN` - значение токена post_server_item, который можно найти в [настройках проекта](https://rollbar.com/)
+- `ENVIRONMENT_NAME` - имя вашего production окружения
 
 ## Цели проекта
 

@@ -1,7 +1,6 @@
 import os
 
 import dj_database_url
-
 from environs import Env
 
 
@@ -42,6 +41,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+
+    'rollbar.contrib.django.middleware.RollbarNotifierMiddlewareExcluding404',
 ]
 
 ROOT_URLCONF = 'star_burger.urls'
@@ -128,3 +129,11 @@ STATICFILES_DIRS = [
 ]
 
 YANDEX_GEO_API_KEY = env('YANDEX_GEO_API_KEY')
+
+# Rollbar settings
+ROLLBAR = {
+    'access_token': env.str('ROLLBAR_TOKEN'),
+    'environment': env.str('ENVIRONMENT_NAME'),
+    'branch': 'main',
+    'root': BASE_DIR,
+}

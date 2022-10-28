@@ -53,12 +53,18 @@ python -m venv venv
 ```sh
 pip install -r requirements.txt
 ```
+- Установите СУБД PostgreSQL и создайте базу данных, следуя [инструкции](https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-20-04)
 
 Создайте файл `.env` в каталоге `star_burger/` со следующими настройками:
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте.
 - `YANDEX_GEO_API_KEY` — API ключ, нужно получить в [кабинете разработчика](https://developer.tech.yandex.ru/services/)
 - `ROLLBAR_TOKEN` - значение токена post_server_item, который можно найти в [настройках проекта](https://rollbar.com/)
 - `ENVIRONMENT_NAME` - имя вашего development окружения
+- `DATABASE_USER` - имя пользователя для доступа к базе данных
+- `DATABASE_HOST` - имя хоста базы данных, по умолчанию localhost
+- `DATABASE_PORT` - порт для доступа к базе данных, по умолчанию 5432
+- `DATABASE_PASSWORD` - пароль доступа к базе данных
+- `DATABASE_NAME` - имя базы данных
 
 Создайте файл базы данных SQLite и отмигрируйте её следующей командой:
 
@@ -151,6 +157,11 @@ Parcel будет следить за файлами в каталоге `bundle
 - `YANDEX_GEO_API_KEY` — API ключ, нужно получить в [кабинете разработчика](https://developer.tech.yandex.ru/services/)
 - `ROLLBAR_TOKEN` - значение токена post_server_item, который можно найти в [настройках проекта](https://rollbar.com/)
 - `ENVIRONMENT_NAME` - имя вашего production окружения
+- `DATABASE_USER` - имя пользователя для доступа к базе данных
+- `DATABASE_HOST` - имя хоста базы данных, по умолчанию localhost
+- `DATABASE_PORT` - порт для доступа к базе данных, по умолчанию 5432
+- `DATABASE_PASSWORD` - пароль доступа к базе данных
+- `DATABASE_NAME` - имя базы данных
 
 ## Цели проекта
 

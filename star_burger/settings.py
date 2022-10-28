@@ -1,7 +1,6 @@
 import os
 
 import dj_database_url
-import rollbar
 from environs import Env
 
 
@@ -138,5 +137,3 @@ ROLLBAR = {
     'branch': 'main',
     'root': BASE_DIR,
 }
-
-rollbar.init(**ROLLBAR)

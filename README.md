@@ -163,6 +163,35 @@ Parcel будет следить за файлами в каталоге `bundle
 - `DATABASE_PASSWORD` - пароль доступа к базе данных
 - `DATABASE_NAME` - имя базы данных
 
+## Как быстро обновить prod-версию сайта
+
+Чтобы не нужно было вводить пароль sudo при рестарте systemd сервиса в директории /etc/sudoers.d/ создайте файл со следующим содержимым:
+```sh
+%[имя пользователя] ALL=NOPASSWD: /bin/systemctl restart star_burger.service
+```
+Создайте и запустите bash-скрипт вида:
+```sh
+#!/bin/bash
+
+set -e
+
+echo "Start star burger site deploy."
+
+cd [путь к корневой директории проекта]
+echo $(git pull origin main)
+source ./env/bin/activate
+pip install -r requirements.txt
+npm ci --dev
+./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
+python manage.py collectstatic --noinput
+python manage.py makemigrations --noinput
+python manage.py migrate --noinput
+sudo systemctl restart star_burger.service
+
+echo "Deploy successfully finished."
+
+```
+
 ## Цели проекта
 
 Код написан в учебных целях — это урок в курсе по Python и веб-разработке на сайте [Devman](https://dvmn.org). За основу был взят код проекта [FoodCart](https://github.com/Saibharath79/FoodCart).

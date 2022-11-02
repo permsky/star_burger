@@ -92,7 +92,6 @@ PORT = env.str('DATABASE_PORT', '5432')
 NAME = env.str('DATABASE_NAME')
 DATABASES = {
     'default': dj_database_url.config(
-        # default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
         default=f'postgres://{USER}:{PASSWORD}@{HOST}:{PORT}/{NAME}'
     )
 }
